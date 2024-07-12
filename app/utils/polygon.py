@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from web3 import Web3
@@ -20,10 +21,8 @@ if web3.is_connected():
 token_contract = web3.eth.contract(CHECKSUM_ADDRESS, abi=ERC20_ABI)
 
 
-def get_balance(address: str) -> str:
-    try:
-        checksum_address = web3.to_checksum_address(address)
-        balance = token_contract.functions.balanceOf(checksum_address).call()
-        return balance
-    except BadFunctionCallOutput as e:
-        return f"Error calling contract function: {e}"
+async def get_balance(address: str) -> str:
+    checksum_address = web3.to_checksum_address(address)
+    balance = await asyncio.to_thread(token_contract.functions.balanceOf(checksum_address).call)
+    return balance
+

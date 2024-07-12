@@ -1,8 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, HTTPException, Query
+from fastapi.responses import JSONResponse
 
-from app.api.schemas.polygon import BalancePost
+from app.api.schemas.polygon import AddressesRequest
 from app.utils.polygon import get_balance
 
 polygon_router = APIRouter(
@@ -11,13 +12,19 @@ polygon_router = APIRouter(
 )
 
 
-@polygon_router.get('/get_balance/', status_code=200)
-async def get_balance(address: str):
-    balance = get_balance(address)
-    return {'balance': balance}
+@polygon_router.get('/get_balance/')
+async def get_balance_route(address: str) -> JSONResponse:
+    try:
+        balance = await get_balance(address)
+        return JSONResponse({'balance': balance}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@polygon_router.post('/get_post/', status_code=200)
-async def get_balance(address: BalancePost):
-    balances = [get_balance(addr.address) for addr in address]
-    return {'balances': balances}
+@polygon_router.post('/get_balance_batch/')
+async def get_balance_batch(address: AddressesRequest) -> JSONResponse:
+    try:
+        balance = [await get_balance(addr) for addr in address.address]
+        return JSONResponse({'balances': balance}, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

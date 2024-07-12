@@ -1,6 +1,8 @@
+from typing import Union
+
 from pydantic import BaseModel
 
 
-class BalancePost(BaseModel):
-    address: str
+class AddressesRequest(BaseModel):
+    address: Union[list[str], str]
 
